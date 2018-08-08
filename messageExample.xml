@@ -4,6 +4,8 @@
   <!-- 2:  -->
   <logger level="INFO" message="#['New invoice from customer' ++ attributes.queryParams.customer_id]"> 
   <!-- 3:  -->
+  <!-- stores HTTP attributes in variable requestAttributes -->
+  <!-- next operation will replace current message -->
   <set-variable name="requestAttributes" value="#[attributes]"> 
   <jms:publish-consume config-ref="JMS_Config" destination="invoiceProcessor">
     <jms:message>
