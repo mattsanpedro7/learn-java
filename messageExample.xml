@@ -1,7 +1,11 @@
 <flow name="messageExample">
   <!-- 1:  -->
+  <!-- request is received -->
+  <!-- http:listener produces a message with request payload and HTTP attributes -->
   <http:listener config-ref="HTTP_Listener_config" path="/invoices"/> 
   <!-- 2:  -->
+  <!-- logger is a void operation && does not produce output -->
+  <!-- message remains the same after execution -->
   <logger level="INFO" message="#['New invoice from customer' ++ attributes.queryParams.customer_id]"> 
   <!-- 3:  -->
   <!-- stores HTTP attributes in variable requestAttributes -->
@@ -12,21 +16,28 @@
       <jms:body>#[output application/xml --- {
         data: payload,
         <!-- 4:  -->
+        <!-- HTTP attributes still available to configure jms:publish-consume -->
         customer: attributes.queryParams.customer_id 
       }]</jms:body>
     </jms:message>
     <!-- 5:  -->
+    <!-- jms:publish-consume invoked, output of operation is Message with different payload and JMS attributes -->
   </jms:publish-consume> 
   <jms:publish config-ref="JMS_Config" destination="eventTracker">
     <jms:message>
       <jms:body>#[output application/json --- {
         <!-- 6:  -->
+        <!-- HTTP attributes stored in a variable, possible to use -->
+        <!-- current JMS attributes and previously stored HTTP information -->
         customer: requestAttributes.queryParams.customer_id, 
         invoiceTrackingNumber: attributes.properties.userProperties.invoiceTrackingNumber
       }]</jms:body>
     </jms:message>
   <!-- 7:  -->
+  <!-- jms:publish is also void -->
+  <!-- no output, Message remains unmodified -->
   </jms:publish>
   <!-- 8:  -->
+  <!-- JMS attributes from jms:publish-consume invocation still exist -->
   <logger level="INFO" message="#['Invoice accepted ' ++ attributes.properties.userProperties.invoiceTrackingNumber]"> 
 </flow>
