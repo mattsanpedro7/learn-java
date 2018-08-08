@@ -1,0 +1,30 @@
+<flow name="messageExample">
+  <!-- 1:  -->
+  <http:listener config-ref="HTTP_Listener_config" path="/invoices"/> 
+  <!-- 2:  -->
+  <logger level="INFO" message="#['New invoice from customer' ++ attributes.queryParams.customer_id]"> 
+  <!-- 3:  -->
+  <set-variable name="requestAttributes" value="#[attributes]"> 
+  <jms:publish-consume config-ref="JMS_Config" destination="invoiceProcessor">
+    <jms:message>
+      <jms:body>#[output application/xml --- {
+        data: payload,
+        <!-- 4:  -->
+        customer: attributes.queryParams.customer_id 
+      }]</jms:body>
+    </jms:message>
+    <!-- 5:  -->
+  </jms:publish-consume> 
+  <jms:publish config-ref="JMS_Config" destination="eventTracker">
+    <jms:message>
+      <jms:body>#[output application/json --- {
+        <!-- 6:  -->
+        customer: requestAttributes.queryParams.customer_id, 
+        invoiceTrackingNumber: attributes.properties.userProperties.invoiceTrackingNumber
+      }]</jms:body>
+    </jms:message>
+  <!-- 7:  -->
+  </jms:publish>
+  <!-- 8:  -->
+  <logger level="INFO" message="#['Invoice accepted ' ++ attributes.properties.userProperties.invoiceTrackingNumber]"> 
+</flow>
