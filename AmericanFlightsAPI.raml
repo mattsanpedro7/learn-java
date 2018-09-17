@@ -1,0 +1,54 @@
+#%RAML 1.0
+baseUri: https://mocksvc.mulesoft.com/mocks/4b316ec8-1fd2-4c53-9d07-afe660282d8a # 
+version: v1
+title: American Flights API
+
+# types element
+# adding a data type to be used by resources in an API
+types:
+  AmericanFlight: !include exchange_modules/68ef9520-24e9-4cf2-b2f5-620025690913/training-american-flight-data-type/1.0.1/AmericanFlightDataType.raml
+
+# resources are defined with slash
+/flights:
+  # methods act upon resources
+  get:
+    queryParameters: 
+      destination:
+        required: false
+        enum:
+          - SFO
+          - LAX
+          - CLE
+          - SD
+    responses: 
+      200:
+        body: 
+          application/json:
+            # set type to be an array of AmericanFlight objects with "[]"
+            type: AmericanFlight[]
+            example: !include exchange_modules/68ef9520-24e9-4cf2-b2f5-620025690913/training-american-flights-example/1.0.1/AmericanFlightsExample.raml
+  post:
+    body: 
+      application/json:
+        type: AmericanFlight
+        example: !include examples/AmericanFlightNoIDExample.raml
+    responses: 
+      201:
+        body: 
+          application/json:
+            example:
+              message: Flight added (but not really!)
+              
+  # URI parameter integer will result in a 200 response?
+  # URI parameter string ill also result in 200
+  # any URI parameter will result in a 200 response
+  # curly braces represent URI parameter
+  /{ID}:
+    get:
+      responses: 
+        200:
+          body: 
+            application/json:
+              type: AmericanFlight
+              # regardless of id, it will always return example
+              example: !include examples/AmericanFlightExample.raml
